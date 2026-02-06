@@ -99,7 +99,12 @@ public class PhoneNumberRequiredAction implements RequiredActionProvider, Creden
 				.getUser()
 				.credentialManager()
 				.getStoredCredentialsStream();
-			if (credentials.anyMatch(x -> secondFactors.contains(x.getType()))) {
+
+			boolean hasSecondFactorCredential = credentials.anyMatch(x -> secondFactors.contains(x.getType()));
+
+			boolean hasPhoneAttribute = hasPhoneAttribute(context.getUser());
+
+			if (hasSecondFactorCredential || hasPhoneAttribute) {
 				// skip as 2FA is already set
 				return;
 			}
@@ -131,6 +136,21 @@ public class PhoneNumberRequiredAction implements RequiredActionProvider, Creden
 
 	@Override
 	public void requiredActionChallenge(RequiredActionContext context) {
+		AuthenticatorConfigModel config = context.getRealm().getAuthenticatorConfigByAlias("sms-2fa");
+		boolean autoReadPhone = config != null && Boolean.parseBoolean(config.getConfig().getOrDefault("autoReadPhone", "false"));
+
+		//Skip phone number input form if user already has phoneNumber attribute
+		if (autoReadPhone && hasPhoneAttribute(context.getUser())) {
+			logger.infof("autoReadPhone enabled and user has phoneNumber attribute, skipping phone input form");
+			String phoneNumber = context.getUser().getFirstAttribute("phoneNumber");
+			context.getAuthenticationSession().setAuthNote("mobile_number", phoneNumber);
+			logger.infof("Auto-populated phone number: [%s], user: %s", phoneNumber, context.getUser().getUsername());
+			context.getAuthenticationSession().addRequiredAction(PhoneValidationRequiredAction.PROVIDER_ID);
+			context.success();
+			return;
+		}
+
+		//Open the phone number input form
 		Response challenge = context.form()
 			.setAttribute("mobileInputFieldPlaceholder", context.getAuthenticationSession().getAuthNote("mobileInputFieldPlaceholder"))
 			.createForm("mobile_number_form.ftl");
@@ -252,6 +272,11 @@ public class PhoneNumberRequiredAction implements RequiredActionProvider, Creden
 			.setError(formatError)
 			.createForm("mobile_number_form.ftl");
 		context.challenge(challenge);
+	}
+
+	private Boolean hasPhoneAttribute(UserModel user) {
+		String mobileNumber = user.getFirstAttribute("phoneNumber");
+		return mobileNumber != null && !mobileNumber.trim().isBlank();
 	}
 
 	@Override

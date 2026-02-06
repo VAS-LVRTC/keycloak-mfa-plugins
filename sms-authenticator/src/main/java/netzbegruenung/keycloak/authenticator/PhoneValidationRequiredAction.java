@@ -48,6 +48,18 @@ public class PhoneValidationRequiredAction implements RequiredActionProvider, Cr
 
 	@Override
 	public void evaluateTriggers(RequiredActionContext context) {
+		AuthenticatorConfigModel config = context.getRealm().getAuthenticatorConfigByAlias("sms-2fa");
+		boolean autoReadPhone = config != null && Boolean.parseBoolean(config.getConfig().getOrDefault("autoReadPhone", "false"));
+
+		//Automatically read kc user phoneNumber if configured to do so
+		if (autoReadPhone && hasPhoneAttribute(context.getUser())) {
+			String existingMobileNumber = context.getAuthenticationSession().getAuthNote("mobile_number");
+			if (existingMobileNumber == null) {
+				logger.infof("autoReadPhone enabled and user has phoneNumber attribute, auto-populating...");
+				String phoneNumber = context.getUser().getFirstAttribute("phoneNumber");
+				context.getAuthenticationSession().setAuthNote("mobile_number", phoneNumber);
+			}
+		}
 	}
 
 	@Override
@@ -74,6 +86,12 @@ public class PhoneValidationRequiredAction implements RequiredActionProvider, Cr
 			Theme theme = context.getSession().theme().getTheme(Theme.Type.LOGIN);
 			Locale locale = context.getSession().getContext().resolveLocale(user);
 			String smsAuthText = theme.getEnhancedMessages(realm,locale).getProperty("smsAuthText");
+
+			boolean overrideText = Boolean.parseBoolean(config.getConfig().getOrDefault("smsTextOverride", "false"));
+			if (overrideText) {
+				smsAuthText = config.getConfig().getOrDefault("smsTextBody", "Your SMS Code is: %s, valid for %d minutes.");
+			}
+
 			String smsText = String.format(smsAuthText, code, Math.floorDiv(ttl, 60));
 
 			SmsServiceFactory.get(config.getConfig()).send(mobileNumber, smsText);
@@ -143,6 +161,11 @@ public class PhoneValidationRequiredAction implements RequiredActionProvider, Cr
 			.setError("smsAuthCodeInvalid")
 			.createForm(SmsAuthenticator.TPL_CODE);
 		context.challenge(challenge);
+	}
+
+	private Boolean hasPhoneAttribute(UserModel user) {
+		String phoneNumber = user.getFirstAttribute("phoneNumber");
+		return phoneNumber != null && !phoneNumber.trim().isBlank();
 	}
 
 	@Override

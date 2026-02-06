@@ -85,6 +85,12 @@ public class SmsAuthenticator implements Authenticator, CredentialValidator<SmsA
 			Theme theme = session.theme().getTheme(Theme.Type.LOGIN);
 			Locale locale = session.getContext().resolveLocale(user);
 			String smsAuthText = theme.getEnhancedMessages(realm,locale).getProperty("smsAuthText");
+
+			boolean overrideText = Boolean.parseBoolean(config.getConfig().getOrDefault("smsTextOverride", "false"));
+			if (overrideText) {
+				smsAuthText = config.getConfig().getOrDefault("smsTextBody", "Your SMS Code is: %s, valid for %d minutes.");
+			}
+
 			String smsText = String.format(smsAuthText, code, Math.floorDiv(ttl, 60));
 
 			SmsServiceFactory.get(config.getConfig()).send(mobileNumber, smsText);
