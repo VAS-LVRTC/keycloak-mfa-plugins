@@ -46,3 +46,10 @@ account console `/realms/realm/account/#/account-security/signing-in` by enterin
 # Enforce SMS 2FA
 If the option `Force 2FA` in the SMS Authenticator config is enabled and a user has no other 2FA method already enabled,
 users will have to set up the SMS Authenticator.
+
+# Override SMS 2FA
+If the option `smsTextOverride` in the SMS Authenticator config is enabled, the SMS text will be overridden by the value of the `smsTextOverride` config option.
+
+# Automatically read in phone number
+If the option `autoReadPhone` in the SMS Authenticator config is enabled, the target phone number will be taken from KC user attribute "phoneNumber" if it exists.
+If the phone number is found, the phone number input form will be skipped and the SMS will be sent directly.
