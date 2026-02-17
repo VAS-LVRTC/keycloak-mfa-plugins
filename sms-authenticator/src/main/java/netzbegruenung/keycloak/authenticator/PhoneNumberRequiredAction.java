@@ -28,10 +28,7 @@ import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import jakarta.ws.rs.core.Response;
 import netzbegruenung.keycloak.authenticator.credentials.SmsAuthCredentialModel;
 import org.jboss.logging.Logger;
-import org.keycloak.authentication.CredentialRegistrator;
-import org.keycloak.authentication.InitiatedActionSupport;
-import org.keycloak.authentication.RequiredActionContext;
-import org.keycloak.authentication.RequiredActionProvider;
+import org.keycloak.authentication.*;
 import org.keycloak.authentication.requiredactions.WebAuthnRegisterFactory;
 import org.keycloak.credential.CredentialModel;
 import org.keycloak.models.AuthenticatorConfigModel;
@@ -147,6 +144,24 @@ public class PhoneNumberRequiredAction implements RequiredActionProvider, Creden
 			logger.infof("Auto-populated phone number: [%s], user: %s", phoneNumber, context.getUser().getUsername());
 			context.getAuthenticationSession().addRequiredAction(PhoneValidationRequiredAction.PROVIDER_ID);
 			context.success();
+			return;
+		}
+
+		//check if user input is disabled
+		boolean disableUserInput = config != null && Boolean.parseBoolean(config.getConfig().getOrDefault("disableUserInput", "false"));
+
+		if (disableUserInput) {
+			logger.warnf("Phone number input is disabled by configuration (disableUserInput=true).");
+
+			String errorText = config.getConfig().getOrDefault(
+				"disabledInputMessage",
+				""
+			);
+
+			Response challenge = context.form()
+				.setError(errorText)
+				.createForm("error_screen_form.ftl");
+			context.challenge(challenge);
 			return;
 		}
 
