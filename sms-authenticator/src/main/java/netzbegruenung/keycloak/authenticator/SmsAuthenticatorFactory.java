@@ -101,7 +101,9 @@ public class SmsAuthenticatorFactory implements AuthenticatorFactory {
 			new ProviderConfigProperty("forceRetryOnBadFormat", "Ask for new number if checks fail", "Sets an error message and asks the user to re-enter phone number if formatting checks are not successfully passed.", ProviderConfigProperty.BOOLEAN_TYPE, false),
 			new ProviderConfigProperty("smsTextOverride", "Override text body?", "Replace SMS message with custom text", ProviderConfigProperty.BOOLEAN_TYPE, false ),
 			new ProviderConfigProperty("smsTextBody", "SMS Text Body", "The text body of the SMS.", ProviderConfigProperty.STRING_TYPE, "Your SMS code is %s."),
-			new ProviderConfigProperty("autoReadPhone", "Automatically read phone number?", "When enabled will read kc users phone number from attributes, instead of asking the user", ProviderConfigProperty.BOOLEAN_TYPE, false )
+			new ProviderConfigProperty("autoReadPhone", "Automatically read phone number?", "When enabled will read kc users phone number from attributes, instead of asking the user", ProviderConfigProperty.BOOLEAN_TYPE, false ),
+			new ProviderConfigProperty("disableUserInput", "Disable user input", "Disable user input for phone number", ProviderConfigProperty.BOOLEAN_TYPE, false),
+			new ProviderConfigProperty("disabledInputMessage", "Disabled input message", "Message to display when user input is disabled", ProviderConfigProperty.STRING_TYPE, "Phone number input is disabled.")
 		);
 	}
 
