@@ -103,7 +103,8 @@ public class SmsAuthenticatorFactory implements AuthenticatorFactory {
 			new ProviderConfigProperty("smsTextBody", "SMS Text Body", "The text body of the SMS.", ProviderConfigProperty.STRING_TYPE, "Your SMS code is %s."),
 			new ProviderConfigProperty("autoReadPhone", "Automatically read phone number?", "When enabled will read kc users phone number from attributes, instead of asking the user", ProviderConfigProperty.BOOLEAN_TYPE, false ),
 			new ProviderConfigProperty("disableUserInput", "Disable user input", "Disable user input for phone number", ProviderConfigProperty.BOOLEAN_TYPE, false),
-			new ProviderConfigProperty("disabledInputMessage", "Disabled input message", "Message to display when user input is disabled", ProviderConfigProperty.STRING_TYPE, "Phone number input is disabled.")
+			new ProviderConfigProperty("disabledInputMessage", "Disabled input message", "Message to display when user input is disabled", ProviderConfigProperty.STRING_TYPE, "Phone number input is disabled."),
+			new ProviderConfigProperty("strictUserPhone", "Read phone number from user properties only", "If enabled the user phone number will not be taken from credentials", ProviderConfigProperty.BOOLEAN_TYPE, false)
 		);
 	}
 
