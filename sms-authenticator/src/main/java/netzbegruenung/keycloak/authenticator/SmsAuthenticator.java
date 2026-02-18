@@ -64,14 +64,13 @@ public class SmsAuthenticator implements Authenticator, CredentialValidator<SmsA
 		UserModel user = context.getUser();
 		RealmModel realm = context.getRealm();
 
-		Optional<CredentialModel> model = context.getUser().credentialManager().getStoredCredentialsByTypeStream(SmsAuthCredentialModel.TYPE).findFirst();
-		String mobileNumber;
-		try {
-			mobileNumber = JsonSerialization.readValue(model.orElseThrow().getCredentialData(), SmsAuthCredentialData.class).getMobileNumber();
-		} catch (IOException e1) {
-			logger.warn(e1.getMessage(), e1);
+		String mobileNumber = getUserPhoneNumber(context);
+
+		if (mobileNumber == null) {
+			logger.warn("User has no mobile number set.");
 			return;
 		}
+
 
 		int length = Integer.parseInt(config.getConfig().get("length"));
 		int ttl = Integer.parseInt(config.getConfig().get("ttl"));
@@ -100,6 +99,29 @@ public class SmsAuthenticator implements Authenticator, CredentialValidator<SmsA
 			context.failureChallenge(AuthenticationFlowError.INTERNAL_ERROR,
 				context.form().setError("smsAuthSmsNotSent", "Error. Use another method.")
 					.createErrorPage(Response.Status.INTERNAL_SERVER_ERROR));
+		}
+	}
+
+	private String getUserPhoneNumber(AuthenticationFlowContext context){
+		String mobileNumber;
+
+		AuthenticatorConfigModel config = context.getAuthenticatorConfig();
+		Optional<CredentialModel> model = context.getUser().credentialManager().getStoredCredentialsByTypeStream(SmsAuthCredentialModel.TYPE).findFirst();
+		UserModel user = context.getUser();
+
+		boolean strictUserPhone = Boolean.parseBoolean(config.getConfig().getOrDefault("strictUserPhone", "false"));
+
+		if (strictUserPhone){
+			mobileNumber = user.getFirstAttribute("phoneNumber");
+			return mobileNumber;
+		}
+
+		try {
+			mobileNumber = JsonSerialization.readValue(model.orElseThrow().getCredentialData(), SmsAuthCredentialData.class).getMobileNumber();
+			return mobileNumber;
+		} catch (IOException e1) {
+			logger.warn(e1.getMessage(), e1);
+			return null;
 		}
 	}
 

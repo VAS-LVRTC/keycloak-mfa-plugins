@@ -22,14 +22,17 @@
 
 package netzbegruenung.keycloak.authenticator;
 
+import netzbegruenung.keycloak.authenticator.credentials.SmsAuthCredentialData;
 import netzbegruenung.keycloak.authenticator.credentials.SmsAuthCredentialModel;
 import netzbegruenung.keycloak.authenticator.gateway.SmsServiceFactory;
 
 import org.jboss.logging.Logger;
+import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.CredentialRegistrator;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.common.util.SecretGenerator;
+import org.keycloak.credential.CredentialModel;
 import org.keycloak.credential.CredentialProvider;
 import org.keycloak.models.AuthenticatorConfigModel;
 import org.keycloak.models.KeycloakSession;
@@ -39,8 +42,12 @@ import org.keycloak.models.UserModel;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.theme.Theme;
 
+import java.io.IOException;
 import java.util.Locale;
+import java.util.Optional;
+
 import jakarta.ws.rs.core.Response;
+import org.keycloak.util.JsonSerialization;
 
 public class PhoneValidationRequiredAction implements RequiredActionProvider, CredentialRegistrator {
 	private static final Logger logger = Logger.getLogger(PhoneValidationRequiredAction.class);
@@ -73,7 +80,7 @@ public class PhoneValidationRequiredAction implements RequiredActionProvider, Cr
 			// TODO: get the alias from somewhere else or move config into realm or application scope
 			AuthenticatorConfigModel config = context.getRealm().getAuthenticatorConfigByAlias("sms-2fa");
 
-			String mobileNumber = authSession.getAuthNote("mobile_number");
+			String mobileNumber = getUserPhoneNumber(context); //TODO change source
 			logger.infof("Validating phone number: %s of user: %s", mobileNumber, user.getUsername());
 
 			int length = Integer.parseInt(config.getConfig().get("length"));
@@ -166,6 +173,29 @@ public class PhoneValidationRequiredAction implements RequiredActionProvider, Cr
 	private Boolean hasPhoneAttribute(UserModel user) {
 		String phoneNumber = user.getFirstAttribute("phoneNumber");
 		return phoneNumber != null && !phoneNumber.trim().isBlank();
+	}
+
+	private String getUserPhoneNumber(RequiredActionContext context){
+		String mobileNumber;
+
+		AuthenticatorConfigModel config = context.getRealm().getAuthenticatorConfigByAlias("sms-2fa");
+		Optional<CredentialModel> model = context.getUser().credentialManager().getStoredCredentialsByTypeStream(SmsAuthCredentialModel.TYPE).findFirst();
+		UserModel user = context.getUser();
+
+		boolean strictUserPhone = Boolean.parseBoolean(config.getConfig().getOrDefault("strictUserPhone", "false"));
+
+		if (strictUserPhone){
+			mobileNumber = user.getFirstAttribute("phoneNumber");
+			return mobileNumber;
+		}
+
+		try {
+			mobileNumber = JsonSerialization.readValue(model.orElseThrow().getCredentialData(), SmsAuthCredentialData.class).getMobileNumber();
+			return mobileNumber;
+		} catch (IOException e1) {
+			logger.warn(e1.getMessage(), e1);
+			return null;
+		}
 	}
 
 	@Override

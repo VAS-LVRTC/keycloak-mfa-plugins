@@ -54,6 +54,10 @@ If the option `smsTextOverride` in the SMS Authenticator config is enabled, the 
 If the option `autoReadPhone` in the SMS Authenticator config is enabled, the target phone number will be taken from KC user attribute "phoneNumber" if it exists.
 If the phone number is found, the phone number input form will be skipped and the SMS will be sent directly.
 
+# Strict phone reading
+If set to true, will priority read the phone number from the user attribute "phoneNumber" if it exists.
+Use this if you expect the phone number to change frequently.
+
 # Disable user phone number input
 If the option `disableUserInput` in the SMS Authenticator config is enabled, the user will not be able to enter a phone number.
 Instead, the phone number will be taken from KC user attribute "phoneNumber" if it exists.
