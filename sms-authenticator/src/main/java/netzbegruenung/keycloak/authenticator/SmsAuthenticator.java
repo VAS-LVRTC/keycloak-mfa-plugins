@@ -68,6 +68,16 @@ public class SmsAuthenticator implements Authenticator, CredentialValidator<SmsA
 
 		if (mobileNumber == null) {
 			logger.warn("User has no mobile number set.");
+
+			String errorText = config.getConfig().getOrDefault(
+				"disabledInputMessage",
+				""
+			);
+
+			Response challenge = context.form()
+				.setError(errorText)
+				.createForm("error_screen_form.ftl");
+			context.challenge(challenge);
 			return;
 		}
 
