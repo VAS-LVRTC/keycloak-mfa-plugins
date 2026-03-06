@@ -73,9 +73,18 @@ public class SmsAuthenticator implements Authenticator, CredentialValidator<SmsA
 				"disabledInputMessage",
 				""
 			);
+			String returnLinkText = config.getConfig().getOrDefault(
+				"returnLinkText",
+				"Return to login"
+			);
+			String returnLinkTarget = config.getConfig().get(
+				"returnLinkTarget"
+			);
 
 			Response challenge = context.form()
 				.setError(errorText)
+				.setAttribute("returnLinkText", returnLinkText)
+				.setAttribute("returnLinkTarget", returnLinkTarget)
 				.createForm("error_screen_form.ftl");
 			context.challenge(challenge);
 			return;

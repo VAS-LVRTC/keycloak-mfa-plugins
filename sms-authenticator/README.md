@@ -62,5 +62,4 @@ Use this if you expect the phone number to change frequently.
 If the option `disableUserInput` in the SMS Authenticator config is enabled, the user will not be able to enter a phone number.
 Instead, the phone number will be taken from KC user attribute "phoneNumber" if it exists.
 If the phone number is not found, an error message will be displayed with an optional configurable error message from the SMS Authenticator config property `disabledInputMessage`.
-Additionally, a message from the language property file will always be displayed.
 The user will not be able to proceed to the next step of the flow.
