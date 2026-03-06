@@ -104,7 +104,9 @@ public class SmsAuthenticatorFactory implements AuthenticatorFactory {
 			new ProviderConfigProperty("autoReadPhone", "Automatically read phone number?", "When enabled will read kc users phone number from attributes, instead of asking the user", ProviderConfigProperty.BOOLEAN_TYPE, false ),
 			new ProviderConfigProperty("disableUserInput", "Disable user input", "Disable user input for phone number", ProviderConfigProperty.BOOLEAN_TYPE, false),
 			new ProviderConfigProperty("disabledInputMessage", "Disabled input message", "Message to display when user input is disabled", ProviderConfigProperty.STRING_TYPE, "Phone number input is disabled."),
-			new ProviderConfigProperty("strictUserPhone", "Read phone number from user properties only", "If enabled the user phone number will not be taken from credentials", ProviderConfigProperty.BOOLEAN_TYPE, false)
+			new ProviderConfigProperty("strictUserPhone", "Read phone number from user properties only", "If enabled the user phone number will not be taken from credentials", ProviderConfigProperty.BOOLEAN_TYPE, false),
+			new ProviderConfigProperty("returnLinkText", "Return link label", "Text shown at the bottom of the error screen", ProviderConfigProperty.STRING_TYPE, "Return to login"),
+			new ProviderConfigProperty("returnLinkTarget", "Return link target", "Set the redirect url for error page", ProviderConfigProperty.STRING_TYPE, "https://keycloak.org")
 		);
 	}
 

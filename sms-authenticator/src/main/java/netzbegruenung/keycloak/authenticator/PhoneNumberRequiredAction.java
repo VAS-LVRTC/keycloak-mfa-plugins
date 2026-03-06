@@ -153,13 +153,20 @@ public class PhoneNumberRequiredAction implements RequiredActionProvider, Creden
 		if (disableUserInput) {
 			logger.warnf("Phone number input is disabled by configuration (disableUserInput=true).");
 
-			String errorText = config.getConfig().getOrDefault(
-				"disabledInputMessage",
-				""
-			);
+			String errorText = config != null
+				? config.getConfig().getOrDefault("disabledInputMessage", "")
+				: "";
+			String returnLinkText = config != null
+				? config.getConfig().getOrDefault("returnLinkText", "Return to login")
+				: "Return to login";
+			String returnLinkTarget = config != null
+				? config.getConfig().get("returnLinkTarget")
+				: null;
 
 			Response challenge = context.form()
 				.setError(errorText)
+				.setAttribute("returnLinkText", returnLinkText)
+				.setAttribute("returnLinkTarget", returnLinkTarget)
 				.createForm("error_screen_form.ftl");
 			context.challenge(challenge);
 			return;
