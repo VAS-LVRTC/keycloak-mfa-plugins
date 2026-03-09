@@ -15,7 +15,11 @@
 			<div class="${properties.kcFormGroupClass!} ${properties.kcFormSettingClass!}">
 				<div id="kc-form-options" class="${properties.kcFormOptionsClass!}">
 					<div class="${properties.kcFormOptionsWrapperClass!}">
-						<span><a href="/">${msg("backToApplication")?no_esc}</a></span>
+						<span>
+							<a href="${returnLinkTarget!url.loginRestartFlowUrl}">
+								${returnLinkText!"Return to login"}
+							</a>
+						</span>
 					</div>
 				</div>
 

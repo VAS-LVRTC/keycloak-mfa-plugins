@@ -90,7 +90,6 @@ public class SmsAuthenticator implements Authenticator, CredentialValidator<SmsA
 			return;
 		}
 
-
 		int length = Integer.parseInt(config.getConfig().get("length"));
 		int ttl = Integer.parseInt(config.getConfig().get("ttl"));
 
@@ -110,10 +109,18 @@ public class SmsAuthenticator implements Authenticator, CredentialValidator<SmsA
 			}
 
 			String smsText = String.format(smsAuthText, code, Math.floorDiv(ttl, 60));
+			String returnLinkText = config.getConfig().getOrDefault("returnLinkText", "Return to login");
+			String returnLinkTarget = config.getConfig().get("returnLinkTarget");
 
 			SmsServiceFactory.get(config.getConfig()).send(mobileNumber, smsText);
 
-			context.challenge(context.form().setAttribute("realm", realm).createForm(TPL_CODE));
+			context.challenge(
+				context.form()
+					.setAttribute("realm", realm)
+					.setAttribute("returnLinkText", returnLinkText)
+					.setAttribute("returnLinkTarget", returnLinkTarget)
+					.createForm(TPL_CODE)
+			);
 		} catch (Exception e) {
 			context.failureChallenge(AuthenticationFlowError.INTERNAL_ERROR,
 				context.form().setError("smsAuthSmsNotSent", "Error. Use another method.")
