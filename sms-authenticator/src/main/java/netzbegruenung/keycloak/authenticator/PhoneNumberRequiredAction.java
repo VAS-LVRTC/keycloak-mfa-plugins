@@ -172,9 +172,18 @@ public class PhoneNumberRequiredAction implements RequiredActionProvider, Creden
 			return;
 		}
 
+		String returnLinkText = config != null
+			? config.getConfig().getOrDefault("returnLinkText", "Return to login")
+			: "Return to login";
+		String returnLinkTarget = config != null
+			? config.getConfig().get("returnLinkTarget")
+			: null;
+
 		//Open the phone number input form
 		Response challenge = context.form()
 			.setAttribute("mobileInputFieldPlaceholder", context.getAuthenticationSession().getAuthNote("mobileInputFieldPlaceholder"))
+			.setAttribute("returnLinkText", returnLinkText)
+			.setAttribute("returnLinkTarget", returnLinkTarget)
 			.createForm("mobile_number_form.ftl");
 		context.challenge(challenge);
 	}
@@ -288,9 +297,19 @@ public class PhoneNumberRequiredAction implements RequiredActionProvider, Creden
 	}
 
 	private void handleInvalidNumber(RequiredActionContext context, String formatError) {
+		AuthenticatorConfigModel config = context.getRealm().getAuthenticatorConfigByAlias("sms-2fa");
+		String returnLinkText = config != null
+			? config.getConfig().getOrDefault("returnLinkText", "Return to login")
+			: "Return to login";
+		String returnLinkTarget = config != null
+			? config.getConfig().get("returnLinkTarget")
+			: null;
+
 		Response challenge = context
 			.form()
 			.setAttribute("mobileInputFieldPlaceholder", context.getAuthenticationSession().getAuthNote("mobileInputFieldPlaceholder"))
+			.setAttribute("returnLinkText", returnLinkText)
+			.setAttribute("returnLinkTarget", returnLinkTarget)
 			.setError(formatError)
 			.createForm("mobile_number_form.ftl");
 		context.challenge(challenge);
